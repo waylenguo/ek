@@ -22,8 +22,8 @@ Available Commands:
   help        Help about any command
   images      获取k8s中指定命名空间中的容器镜像
   migrate     迁移k8s中的镜像
+  version     查看版本信息
 
 Flags:
   -h, --help   help for ek
-
 ```
