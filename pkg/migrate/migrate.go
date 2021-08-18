@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ek/pkg/aws"
 	"github.com/ek/pkg/docker"
+	"github.com/ek/pkg/domain"
 	"regexp"
 	"strings"
 )
@@ -17,6 +18,12 @@ type Option struct {
 	Prefix string
 }
 
+type PullImageInfo struct {
+	Status string `json:"status"`
+	ProgressDetail map[string]string `json:"progressDetail,omitempty"`
+	Progress string `json:"progress,omitempty"`
+	Id string `json:"id"`
+}
 
 var regex *regexp.Regexp
 
@@ -67,7 +74,7 @@ func getRepositoryName(image string, config *Option) (tagName string, repository
 		repository string
 	)
 	for i, part := range parts {
-		if i == 0 {
+		if i == 0 && domain.IsDomain(part) {
 			continue
 		} else {
 			tag = tag + "/" + part
@@ -84,9 +91,3 @@ func getRepositoryName(image string, config *Option) (tagName string, repository
 	return tag, repository
 }
 
-type PullImageInfo struct {
-	Status string `json:"status"`
-	ProgressDetail map[string]string `json:"progressDetail,omitempty"`
-	Progress string `json:"progress,omitempty"`
-	Id string `json:"id"`
-}
