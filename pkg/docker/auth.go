@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
+	"github.com/ek/pkg/aws"
 	"github.com/spf13/viper"
 )
 
@@ -14,13 +15,18 @@ type Config struct {
 type Repository struct {
 	Host string `yaml:"host"`
 	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Password string `yaml:"password,omitempty"`
+	Type string `yaml:"type,omitempty"`
 }
 
 func GetAuthMapping(configPath string) map[string]string {
 	authMapping := make(map[string]string)
 	config := loadConfig(configPath)
 	for _, repository := range config.Repositories {
+		if repository.Type != "" && repository.Type == "AWS"{
+			password := aws.NewEcr().GetLoginPassword()
+			repository.Password = *password
+		}
 		auth := types.AuthConfig{
 			Username: repository.Username,
 			Password: repository.Password,

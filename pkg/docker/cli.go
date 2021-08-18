@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/ek/pkg/domain"
 	"github.com/ek/pkg/streams"
 	"github.com/moby/term"
 	"io"
@@ -138,6 +139,10 @@ func (dockerCli *DockerCli) display(reader io.ReadCloser, err error) {
 }
 
 func getAuth(image string, authMapping map[string]string) string {
+	var authToken = ""
 	host := strings.Split(image, "/")[0]
-	return authMapping[host]
+	if domain.IsDomain(host) {
+		authToken = authMapping[host]
+	}
+	return authToken
 }
