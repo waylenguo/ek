@@ -20,7 +20,7 @@ type Streams interface {
 	Err() io.Writer
 }
 
-type DockerCli struct {
+type Cli struct {
 	cli 			   *client.Client
 	in                 *streams.In
 	out                *streams.Out
@@ -28,23 +28,23 @@ type DockerCli struct {
 	auth			   map[string]string
 }
 
-func (dockerCli *DockerCli) Out() *streams.Out {
+func (dockerCli *Cli) Out() *streams.Out {
 	return dockerCli.out
 }
 
-func (dockerCli *DockerCli) Err() io.Writer {
+func (dockerCli *Cli) Err() io.Writer {
 	return dockerCli.err
 }
 
-func (dockerCli *DockerCli) SetIn(in *streams.In) {
+func (dockerCli *Cli) SetIn(in *streams.In) {
 	dockerCli.in = in
 }
 
-func (dockerCli *DockerCli) In() *streams.In {
+func (dockerCli *Cli) In() *streams.In {
 	return dockerCli.in
 }
 
-func NewClient(configPath string) *DockerCli {
+func NewClient(configPath string) *Cli {
 	// 加载配置
 	authMapping := GetAuthMapping(configPath)
 
@@ -55,14 +55,14 @@ func NewClient(configPath string) *DockerCli {
 	}
 	_, stdout, _ := term.StdStreams()
 	buildBuff := streams.NewOut(stdout)
-	return &DockerCli{
+	return &Cli{
 		cli: cli,
 		out: buildBuff,
 		auth: authMapping,
 	}
 }
 
-func (dockerCli *DockerCli) PullImage(image string) {
+func (dockerCli *Cli) PullImage(image string) {
 	ctx := context.Background()
 	cli := dockerCli.cli
 
@@ -77,25 +77,25 @@ func (dockerCli *DockerCli) PullImage(image string) {
 		if err := json.Unmarshal(*msg.Aux, &result); err != nil {
 
 		} else {
-			fmt.Println("我是ImageID： " + result.ID)
+
 		}
 	}
 
 	err = jsonmessage.DisplayJSONMessagesStream(reader, dockerCli.Out(), dockerCli.Out().FD(), dockerCli.Out().IsTerminal(), aux)
 	if err != nil {
-		if jerr, ok := err.(*jsonmessage.JSONError); ok {
+		if jsonError, ok := err.(*jsonmessage.JSONError); ok {
 			// If no error code is set, default to 1
-			if jerr.Code == 0 {
-				jerr.Code = 1
+			if jsonError.Code == 0 {
+				jsonError.Code = 1
 			}
-			print(jerr.Message)
+			print(jsonError.Message)
 		}
 	}
 	_, _ = fmt.Fprint(dockerCli.Out())
 	reader.Close()
 }
 
-func (dockerCli *DockerCli) ImageTag(image string, tag string) {
+func (dockerCli *Cli) ImageTag(image string, tag string) {
 
 	err := dockerCli.cli.ImageTag(context.Background(), image, tag)
 	if err != nil {
@@ -103,14 +103,13 @@ func (dockerCli *DockerCli) ImageTag(image string, tag string) {
 	}
 }
 
-func (dockerCli *DockerCli) PushImage(image string) {
+func (dockerCli *Cli) PushImage(image string) {
 
 	resp, err := dockerCli.cli.ImagePush(context.Background(), image,  types.ImagePushOptions{RegistryAuth: getAuth(image, dockerCli.auth)})
 	dockerCli.display(resp, err)
-
 }
 
-func (dockerCli *DockerCli) display(reader io.ReadCloser, err error) {
+func (dockerCli *Cli) display(reader io.ReadCloser, err error) {
 	if err != nil {
 		panic(err.Error())
 	}
@@ -120,22 +119,21 @@ func (dockerCli *DockerCli) display(reader io.ReadCloser, err error) {
 		if err := json.Unmarshal(*msg.Aux, &result); err != nil {
 
 		} else {
-			fmt.Println("我是ImageID： " + result.ID)
 		}
 	}
 
 	err = jsonmessage.DisplayJSONMessagesStream(reader, dockerCli.Out(), dockerCli.Out().FD(), dockerCli.Out().IsTerminal(), aux)
 	if err != nil {
-		if jerr, ok := err.(*jsonmessage.JSONError); ok {
-			// If no error code is set, default to 1
-			if jerr.Code == 0 {
-				jerr.Code = 1
+		if jsonError, ok := err.(*jsonmessage.JSONError); ok {
+			// If no jsonError code is set, default to 1
+			if jsonError.Code == 0 {
+				jsonError.Code = 1
 			}
-			print(jerr.Message)
+			print(jsonError.Message)
 		}
 	}
 	_, _ = fmt.Fprint(dockerCli.Out())
-	reader.Close()
+	defer reader.Close()
 }
 
 func getAuth(image string, authMapping map[string]string) string {

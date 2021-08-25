@@ -8,7 +8,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use: "ek",
-	Short: "k8s终端工具",
+	Short: "k8s工具集，提供易用的功能",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
 	},

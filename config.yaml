@@ -1,5 +1,5 @@
 repositories:
-  - host: xxxxx.dkr.ecr.cn-northwest-1.amazonaws.com.cn
+  - host: 567969457461.dkr.ecr.cn-northwest-1.amazonaws.com.cn
     username: AWS
     password:
     type: AWS

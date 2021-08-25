@@ -31,7 +31,7 @@ func (s *Set) Has(item string) bool {
 	s.RLock()
 	defer s.RUnlock()
 	_, ok := s.m[item]
-	return ok;
+	return ok
 }
 
 func (s *Set) Len() int {
@@ -54,7 +54,7 @@ func (s *Set) IsEmpty() bool {
 func (s *Set) List() []string {
 	s.RLock()
 	defer s.RUnlock()
-	list := []string{}
+	var list []string
 	for item := range s.m {
 		list = append(list, item)
 	}

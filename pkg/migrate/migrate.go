@@ -11,7 +11,6 @@ import (
 
 type Option struct {
 	Namespace string
-	Image string
 	Repository string
 	Exclude string
 	Config string
@@ -27,7 +26,7 @@ type PullImageInfo struct {
 
 var regex *regexp.Regexp
 
-func MigrateImage(images []string, config *Option) {
+func Run(images []string, config *Option) {
 
 	if config.Exclude != "" {
 		regex = regexp.MustCompile(config.Exclude)
@@ -48,46 +47,34 @@ func MigrateImage(images []string, config *Option) {
 			}
 		}
 
-		fmt.Printf("pulling image: %v\n", image)
-
-
-		dockerCli.PullImage(image)
 		// 迁移镜像
-		tag, res := getRepositoryName(image, config)
-		tag = config.Repository + tag
-		fmt.Printf("tag image : %v -> %v\n", image, tag)
+		// abc.io/mammoth/promtail:2.2.0
+		parts := strings.Split(image, ":")
+		// version = 2.2.0
+		version := parts[1]
+		// abc.io/mammoth/promtail
+		repositoryParts := strings.Split(parts[0], "/")
+		var tagName = image
+		var repository string
+		if domain.IsDomain(repositoryParts[0]) {
+			tagName = strings.TrimPrefix(image, repositoryParts[0] + "/")
+		}
+		repository = strings.TrimSuffix(tagName, ":" + version)
+		if config.Prefix != "" {
+			repository = config.Prefix +  "/" + repository
+			tagName = config.Prefix + "/" + tagName
+		}
+		tagName = config.Repository + "/" + tagName
 
-		dockerCli.ImageTag(image, tag)
-
-		// 推送镜像
-		ecr.CreateRepository(res)
-		fmt.Println("==============================================================================================")
-		dockerCli.PushImage(tag)
-	}
-}
-
-
-func getRepositoryName(image string, config *Option) (tagName string, repositoryName string) {
-	parts := strings.Split(image, "/")
-	var (
-		tag string
-		repository string
-	)
-	for i, part := range parts {
-		if i == 0 && domain.IsDomain(part) {
-			continue
+		// 检查镜像是否存在
+		imageExist := ecr.CheckImageIsExist(repository, version)
+		if !imageExist {
+			dockerCli.PullImage(image)
+			fmt.Printf("tag image : %v -> %v\n", image, tagName)
+			dockerCli.ImageTag(image, tagName)
+			dockerCli.PushImage(tagName)
 		} else {
-			tag = tag + "/" + part
-			repository = repository + "/" + part
+			fmt.Printf("镜像 [%v] 已经存在\n", image)
 		}
 	}
-	repository = strings.Split(repository, ":")[0]
-
-	if config.Prefix != "" {
-		tag = "/" + config.Prefix + tag
-		repository = config.Prefix + repository
-	}
-
-	return tag, repository
 }
-

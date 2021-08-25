@@ -18,7 +18,6 @@ var migrateOption = &migrate.Option{}
 
 func init() {
 	migrateCmd.Flags().StringVarP(&migrateOption.Namespace, "namespace", "n", "", "-n default")
-	migrateCmd.Flags().StringVarP(&migrateOption.Image, "image", "i", "", "-i image")
 	migrateCmd.Flags().StringVarP(&migrateOption.Repository, "repository", "r", "", "-r repository")
 	migrateCmd.Flags().StringVarP(&migrateOption.Exclude, "exclude", "e", "", "-e regex")
 	migrateCmd.Flags().StringVarP(&migrateOption.Config, "config", "c", "", "-c config path")
@@ -30,6 +29,6 @@ func run() {
 
 	// 获取指定镜像名称
 	images := k8sClient.FetchImages(migrateOption.Namespace)
-	migrate.MigrateImage(images, migrateOption)
+	migrate.Run(images, migrateOption)
 
 }

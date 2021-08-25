@@ -58,3 +58,34 @@ func (cli *Ecr) GetLoginPassword() *string {
 	authToken = strings.Split(authToken, ":")[1]
 	return &authToken
 }
+
+func (cli *Ecr) CheckImageIsExist(repository string, version string) bool {
+	imageIsExist := false
+	svc := cli.instance
+
+	listImagesOutput, err := svc.ListImages(context.TODO(), &ecr.ListImagesInput{RepositoryName: &repository})
+	if err != nil {
+		var rnfe *types.RepositoryNotFoundException
+		if !errors.As(err, &rnfe) {
+			panic(err)
+		} else {
+			// 如果仓库不存在，创建仓库
+			cli.CreateRepository(repository)
+			return imageIsExist
+		}
+	}
+	for _, imageId := range listImagesOutput.ImageIds {
+		if strings.Compare(*imageId.ImageTag, version) == 0 {
+			imageIsExist = true
+			break
+		}
+	}
+	return imageIsExist
+}
+
+//func getRepositoryAndTag(image string) (repository *string, tag * string) {
+//	parts := strings.Split(image, ":")
+//	repository = &parts[0]
+//	tag = &parts[1]
+//	return repository, tag
+//}
