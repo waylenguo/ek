@@ -9,7 +9,7 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v20.10.8+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/hypnoglow/helm-s3 v0.10.0 // indirect
+	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/moby/term v0.0.0-20200312100748-672ec06f55cd
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1

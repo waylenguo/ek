@@ -62,14 +62,14 @@ func NewClient(configPath string) *Cli {
 	}
 }
 
-func (dockerCli *Cli) PullImage(image string) {
+func (dockerCli *Cli) PullImage(image string) (err error) {
 	ctx := context.Background()
 	cli := dockerCli.cli
 
 
 	reader, err := cli.ImagePull(ctx, image, types.ImagePullOptions{RegistryAuth: getAuth(image, dockerCli.auth)})
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 
 	aux := func(msg jsonmessage.JSONMessage) {
@@ -93,6 +93,7 @@ func (dockerCli *Cli) PullImage(image string) {
 	}
 	_, _ = fmt.Fprint(dockerCli.Out())
 	reader.Close()
+	return nil
 }
 
 func (dockerCli *Cli) ImageTag(image string, tag string) {

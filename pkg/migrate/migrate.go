@@ -51,7 +51,11 @@ func Run(images []string, config *Option) {
 		// abc.io/mammoth/promtail:2.2.0
 		parts := strings.Split(image, ":")
 		// version = 2.2.0
-		version := parts[1]
+		var version string
+		if len(parts) > 1 {
+			version = parts[1]
+		}
+
 		// abc.io/mammoth/promtail
 		repositoryParts := strings.Split(parts[0], "/")
 		var tagName = image
@@ -69,7 +73,13 @@ func Run(images []string, config *Option) {
 		// 检查镜像是否存在
 		imageExist := ecr.CheckImageIsExist(repository, version)
 		if !imageExist {
-			dockerCli.PullImage(image)
+			fmt.Printf("pull image : [%v]\n", image)
+			err := dockerCli.PullImage(image)
+			if err != nil {
+				fmt.Errorf("pull image [%v] error, details: %v", image, err)
+				continue
+			}
+
 			fmt.Printf("tag image : %v -> %v\n", image, tagName)
 			dockerCli.ImageTag(image, tagName)
 			dockerCli.PushImage(tagName)
