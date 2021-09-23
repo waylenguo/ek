@@ -1,6 +1,6 @@
 # EK
 
-kubernetes工具
+kubernetes便捷运维工具
 
 ## 安装
 项目使用golang 1.15，开始之前请先安装golang。
