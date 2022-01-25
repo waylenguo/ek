@@ -10,7 +10,8 @@ var imagesCmd = &cobra.Command{
 	Use: "images",
 	Short: "获取k8s中指定命名空间中的容器镜像",
 	Run: func(cmd *cobra.Command, args []string) {
-		images := k8s.FetchImages(namespace)
+		k8sClient := k8s.NewClient()
+		images := k8sClient.FetchImages(namespace)
 		for _, image := range images {
 			fmt.Println(image)
 		}

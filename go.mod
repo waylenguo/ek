@@ -10,6 +10,7 @@ require (
 	github.com/docker/docker v20.10.8+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/gorilla/mux v1.7.3 // indirect
+	github.com/manifoldco/promptui v0.8.0
 	github.com/moby/term v0.0.0-20200312100748-672ec06f55cd
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
@@ -18,6 +19,7 @@ require (
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20210816032535-30e4713e60e3 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	k8s.io/api v0.21.4
 	k8s.io/apimachinery v0.21.4
 	k8s.io/client-go v0.21.4
 )

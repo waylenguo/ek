@@ -26,7 +26,7 @@ func init() {
 }
 
 func run() {
-
+	k8sClient := k8sClient.NewClient()
 	// 获取指定镜像名称
 	images := k8sClient.FetchImages(migrateOption.Namespace)
 	migrate.Run(images, migrateOption)

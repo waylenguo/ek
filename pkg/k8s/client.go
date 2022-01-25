@@ -3,7 +3,9 @@ package k8s
 import (
 	"context"
 	"flag"
+	"fmt"
 	set "github.com/ek/pkg/util"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -49,9 +51,8 @@ func homeDir() string {
 	return os.Getenv("USERPROFILE") // windows
 }
 
-func FetchImages(namespace string) []string {
-	clientset := NewClient()
-	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+func (k8sClient *Client) FetchImages(namespace string) []string {
+	pods, err := k8sClient.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -74,4 +75,30 @@ func FetchImages(namespace string) []string {
 	}
 
 	return images.List();
+}
+
+func (k8sClient *Client) FetchPods(namespace string) *v1.PodList {
+	pods, err := k8sClient.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	return pods
+}
+
+func (k8sClient *Client) FetchNamespaces() *v1.NamespaceList {
+	namespaces, err := k8sClient.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	return namespaces
+}
+
+func (k8sClient *Client) DescribePod(pod v1.Pod) {
+	name := pod.GetName()
+	namespace := pod.GetNamespace()
+	labels := pod.GetLabels()
+	annotations := pod.GetAnnotations()
+
+	fmt.Println(name, namespace, labels, annotations)
+
 }
